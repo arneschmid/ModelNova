@@ -37,7 +37,8 @@ osThreadAttr_t attrAlgorithmThread = {
 
 // StdinPollThread thread attributes
 osThreadAttr_t attrStdinPollThread = {
-  .name = "StdinPoll"
+  .name = "StdinPoll",
+  .priority = osPriorityBelowNormal
 };
 
 // SDS error information
