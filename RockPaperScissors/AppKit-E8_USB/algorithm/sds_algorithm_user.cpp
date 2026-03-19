@@ -70,6 +70,46 @@ static void VideoOut_Event_Callback(uint32_t event) {
     (void)event;
 }
 
+/* Flip an RGB888 frame vertically in-place (top ↔ bottom). */
+static void flip_rgb888_vertical(uint8_t *buf, int width, int height) {
+    const size_t row_bytes = (size_t)width * 3U;
+    std::vector<uint8_t> tmp(row_bytes);
+
+    for (int y = 0; y < height / 2; ++y) {
+        uint8_t *top = buf + (size_t)y * row_bytes;
+        uint8_t *bottom = buf + (size_t)(height - 1 - y) * row_bytes;
+
+        std::memcpy(tmp.data(), top, row_bytes);
+        std::memcpy(top, bottom, row_bytes);
+        std::memcpy(bottom, tmp.data(), row_bytes);
+    }
+}
+
+/* Flip an RGB888 frame vertically in-place (top ↔ bottom). */
+static void flip_rgb888_horizontal(uint8_t *buf, int width, int height) {
+    const size_t row_bytes = (size_t)width * 3U;
+
+    for (int y = 0; y < height; ++y) {
+        uint8_t *row = buf + (size_t)y * row_bytes;
+        for (int x = 0; x < width / 2; ++x) {
+            uint8_t *left  = row + (size_t)x * 3U;
+            uint8_t *right = row + (size_t)(width - 1 - x) * 3U;
+
+            uint8_t tmp0 = left[0];
+            uint8_t tmp1 = left[1];
+            uint8_t tmp2 = left[2];
+
+            left[0] = right[0];
+            left[1] = right[1];
+            left[2] = right[2];
+
+            right[0] = tmp0;
+            right[1] = tmp1;
+            right[2] = tmp2;
+        }
+    }
+}
+
 /* ============================================================================
  * InitAlgorithm
  * ============================================================================
@@ -146,6 +186,9 @@ int32_t ExecuteAlgorithm(uint8_t *in_buf, uint32_t in_num,
 #if ENABLE_TIME_PROFILING
     uint32_t pre_process_time = profiler_start();
 #endif
+
+    /* Flip camera frame horizontally before any processing */
+    flip_rgb888_horizontal(in_buf, IMAGE_WIDTH, IMAGE_HEIGHT);
 
     preprocess(in_buf);
 
