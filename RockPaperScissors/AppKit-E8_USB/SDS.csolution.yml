@@ -28,7 +28,7 @@ solution:
         - SDSIO-Layer: $SolutionDir()$/sdsio/usb/sdsio_usb.clayer.yml
         - AI-Layer: $SolutionDir()$/ai_layer/ai_layer.clayer.yml
       target-set:
-        - set:
+        - set: J-Link
           debugger:
             name: J-Link Server
             clock: 4000000
@@ -36,6 +36,17 @@ solution:
             start-pname: M55_HP
           images:
             - project-context: AlgorithmTest.DebugRec
+        - set: HIL
+          debugger:
+            name: ULINKplus@pyOCD
+            clock: 10000000
+            protocol: swd
+            start-pname: M55_HP
+            telnet:
+              - pname: M55_HP
+                mode: console
+          images:
+            - project-context: AlgorithmTest.DebugPlay
 
   # List of different build configurations.
   build-types:
